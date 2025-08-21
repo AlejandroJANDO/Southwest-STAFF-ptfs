@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Southwest Airlines PTFS • Staff Portal</title>
+<style>
+  :root{
+    /* Southwest theme */
+    --bg-solid:#304cb2;      /* MAIN background */
+    --ink:#eaf1ff;
+    --muted:#dfe7ff;
+    --brand:#ffbf27;
+    --accent:#ffd66e;
+    --danger:#ff4d6d;
+
+    --panel:rgba(255,255,255,.06);
+    --panel-strong:rgba(255,255,255,.10);
+    --border:1px solid rgba(255,255,255,.18);
+    --radius:16px;
+    --shadow:0 18px 50px rgba(0,0,0,.35);
+    --shadow-sm:0 8px 24px rgba(0,0,0,.28);
+
+    /* Doc frame height – one full page visible, scroll for more */
+    --doc-h-desktop: 1250px;
+    --doc-h-tablet: 1100px;
+    --doc-h-mobile: 950px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    font:15px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: var(--bg-solid);  /* solid SWA blue — content stays still */
+    overflow-x:hidden;
+  }
+
+  /* ===== QUICKER GRADIENT WAVES BACKGROUND =====
+     Two large blurred gradient layers that rotate/scale a bit faster.
+     • Adjust speed with the animation durations
+     • Adjust intensity with opacity values below
+  */
+  .waves, .waves2{
+    position:fixed;
+    left:-20vmax; top:-20vmax; right:-20vmax; bottom:-20vmax;
+    z-index:-3;                   /* behind everything */
+    pointer-events:none;
+    filter: blur(64px) saturate(112%);
+    opacity:.40;                  /* << lower for subtler, raise for stronger */
+    will-change: transform, filter;
+  }
+  .waves{
+    background:
+      radial-gradient(50% 40% at 25% 30%, rgba(48,76,178,0.42), transparent 70%),
+      radial-gradient(46% 38% at 72% 33%, rgba(192,22,27,0.40), transparent 72%),
+      radial-gradient(42% 36% at 60% 70%, rgba(250,169,25,0.36), transparent 75%),
+      radial-gradient(58% 46% at 35% 65%, rgba(48,76,178,0.36), transparent 70%);
+    /* faster than before (was 180s) */
+    animation: waves-spin 75s linear infinite, waves-breathe 18s ease-in-out infinite alternate;
+  }
+  .waves2{
+    z-index:-2;
+    background:
+      radial-gradient(45% 35% at 30% 40%, rgba(250,169,25,0.30), transparent 72%),
+      radial-gradient(50% 42% at 75% 60%, rgba(192,22,27,0.34), transparent 72%),
+      radial-gradient(42% 36% at 55% 25%, rgba(48,76,178,0.32), transparent 74%);
+    /* counter-rotate, a touch slower than layer 1 */
+    animation: waves-spin-rev 95s linear infinite, waves-breathe 22s ease-in-out infinite alternate-reverse;
+    opacity:.34;
+  }
+  @keyframes waves-spin{
+    from{ transform: rotate(0deg) scale(1.06); }
+    to  { transform: rotate(360deg) scale(1.12); }
+  }
+  @keyframes waves-spin-rev{
+    from{ transform: rotate(360deg) scale(1.08); }
+    to  { transform: rotate(0deg)   scale(1.15); }
+  }
+  @keyframes waves-breathe{
+    from{ filter: blur(60px) saturate(108%); }
+    to  { filter: blur(84px) saturate(122%); }
+  }
+
+  /* Top Nav */
+  .topbar{
+    position:sticky; top:0; z-index:1000;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px clamp(14px, 3vw, 28px);
+    background:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.08));
+    border-bottom: var(--border);
+    backdrop-filter: blur(10px);
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand h1{margin:0; font-size:16px; letter-spacing:.02em}
+  .badge{background:#ffbf27; color:#000; border:var(--border); padding:2px 8px; border-radius:999px; font-size:11px; font-weight:800}
+
+  .nav{display:flex; gap:8px; flex-wrap:wrap}
+  .tab{
+    appearance:none; border:none; cursor:pointer;
+    color:var(--ink); font-weight:700; letter-spacing:.02em;
+    background:var(--panel); border:var(--border);
+    border-radius:999px; padding:10px 14px; box-shadow:var(--shadow-sm);
+    transition:transform .15s ease, background .15s ease, color .15s ease;
+  }
+  .tab:hover{ transform:translateY(-1px); background:var(--panel-strong) }
+  .tab.active{ background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)); color:#fff; }
+
+  .signout{
+    appearance:none; border:var(--border); background:transparent; color:#fff;
+    border-radius:10px; padding:6px 10px; cursor:pointer
+  }
+  .signout:hover{ background:rgba(255,255,255,.08) }
+
+  /* Layout */
+  .wrap{ max-width:1200px; margin:24px auto; padding:0 20px; }
+
+  /* Panels & general UI */
+  .grid{ display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));}
+  .panel{ background:var(--panel); border:var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; backdrop-filter: blur(8px) }
+  .panel h3{margin:0 0 10px 0}
+  .notice{
+    background:linear-gradient(180deg, rgba(255,191,39,.25), rgba(255,191,39,.10));
+    border:1px dashed rgba(255,191,39,.8);
+    padding:12px; border-radius:12px; color:#fff; font-weight:700
+  }
+  a{color:#fff; text-decoration:underline}
+  a:hover{text-decoration:none}
+
+  /* Dashboard hero (ONLY on dashboard) */
+  .hero{
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+    padding:18px; border-radius:20px; border:var(--border);
+    background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+    box-shadow:var(--shadow); backdrop-filter:blur(10px);
+    margin-bottom:16px;
+  }
+  .hero h2{margin:.2rem 0 0; font-size:28px}
+  .pill{display:inline-block; background:rgba(255,255,255,.15); color:#fff; font-weight:700; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.35)}
+  .meta{color:var(--muted); font-size:13px}
+
+  /* Sections */
+  .section{ display:none; animation:pop .18s ease }
+  .section.active{ display:block }
+  @keyframes pop{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+  /* Checklists */
+  details{ border:var(--border); border-radius:14px; background:rgba(255,255,255,.08); padding:10px; }
+  details+details{ margin-top:10px }
+  details summary{ cursor:pointer; font-weight:800; list-style:none }
+  details summary::-webkit-details-marker{display:none}
+  .checklist{ display:grid; gap:10px; margin-top:8px }
+  .item{ display:flex; gap:12px; align-items:flex-start; padding:10px; border-radius:12px;
+         background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.20);}
+  .item input[type="checkbox"]{ width:18px; height:18px; margin-top:2px; accent-color:#ffbf27 }
+  .label{ flex:1 }
+
+  /* Doc frames */
+  .doc-frame{
+    width:100%;
+    height:var(--doc-h-desktop);
+    border:1px solid rgba(255,255,255,.28);
+    border-radius:14px;
+    background:#0f1630;
+    box-shadow:var(--shadow);
+  }
+  @media (max-width:1100px){ .doc-frame{ height:var(--doc-h-tablet); } }
+  @media (max-width:720px){ .doc-frame{ height:var(--doc-h-mobile); } }
+
+  /* Auth overlay */
+  .auth{
+    position:fixed; inset:0; z-index:9999; display:grid; place-items:center;
+    background: var(--bg-solid);
+  }
+  .auth-card{
+    width:min(560px, 92vw); border-radius:18px; padding:22px;
+    background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+    border: var(--border); box-shadow:var(--shadow); backdrop-filter: blur(16px);
+  }
+  .auth-row{ display:flex; gap:8px; margin-top:12px }
+  .input{
+    flex:1; padding:12px 14px; border-radius:12px;
+    border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.12); color:var(--ink)
+  }
+  .btn{
+    appearance:none; border:none; cursor:pointer; font-weight:800; letter-spacing:.02em;
+    background:linear-gradient(180deg, #ffcc4d, #ffb800); color:#000;
+    border-radius:12px; padding:12px 16px; box-shadow:var(--shadow-sm)
+  }
+  .err{ display:none; margin-top:8px; color:var(--danger); font-weight:800 }
+</style>
+</head>
+<body>
+
+<!-- QUICKER GRADIENT WAVES -->
+<div class="waves" aria-hidden="true"></div>
+<div class="waves2" aria-hidden="true"></div>
+
+<!-- AUTH OVERLAY -->
+<div class="auth" id="auth">
+  <div class="auth-card">
+    <div class="brand" style="margin-bottom:6px;">
+      <span class="badge">STAFF</span>
+      <h1>Southwest Airlines PTFS • Staff Portal</h1>
+    </div>
+    <p class="meta">Enter staff passcode to continue.</p>
+    <div class="auth-row">
+      <input id="pass" type="password" class="input" placeholder="Passcode" autocomplete="current-password" />
+      <button id="go" class="btn">Unlock</button>
+    </div>
+    <div id="authErr" class="err">Incorrect passcode. Try again.</div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<header class="topbar">
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s8-4.5 8-11a8 8 0 0 0-16 0c0 6.5 8 11 8 11Z" stroke="#fff" stroke-width="2"/></svg>
+    <h1>Southwest PTFS • Staff</h1>
+    <span class="badge">INTERNAL</span>
+  </div>
+  <nav class="nav">
+    <button class="tab active" data-target="dashboard">Dashboard</button>
+    <button class="tab" data-target="announcements">Announcements</button>
+    <button class="tab" data-target="sops">SOP / Policies</button>
+    <button class="tab" data-target="pilot">Pilots</button>
+    <button class="tab" data-target="ground">Ground Crew</button>
+    <button class="tab" data-target="fa">Flight Attendants</button>
+    <button class="tab" data-target="resources">Resources</button>
+    <button class="signout" title="Sign out" onclick="localStorage.removeItem('swaStaffAuth'); location.reload()">Sign out</button>
+  </nav>
+</header>
+
+<main class="wrap" id="app" aria-hidden="true">
+
+  <!-- DASHBOARD ONLY -->
+  <section id="dashboard" class="section active">
+    <div class="hero">
+      <div>
+        <span class="pill">Welcome, Crew</span>
+        <h2>Internal Staff Pages</h2>
+        <div class="meta">PTFS operations • Training • Checklists • Realism guidelines</div>
+      </div>
+      <div class="meta">v2 • Glass UI</div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h3>Today’s Focus</h3>
+        <div style="font-size:26px; font-weight:900; color:#fff">Safety • Communication • Realism</div>
+        <p class="meta">Practice standard phraseology, follow checklists, coordinate with your team.</p>
+      </div>
+      <div class="panel">
+        <h3>Quick Links</h3>
+        <ul class="meta" style="line-height:1.7">
+          <li><a href="#" onclick="show('pilot')">Pilot Checklist</a></li>
+          <li><a href="#" onclick="show('ground')">Ground Ops</a></li>
+          <li><a href="#" onclick="show('fa')">Cabin Procedures</a></li>
+          <li><a href="#" onclick="show('sops')">SOP / Policies</a></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Notes</h3>
+        <div class="notice">Made by Alejandro not affiliated with Southwest PTFS</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANNOUNCEMENTS -->
+  <section id="announcements" class="section">
+    <div class="panel">
+      <h3>Latest Updates</h3>
+      <ul class="meta" style="line-height:1.8">
+        <li>Updated pilot descent & approach profiles for smoother landings.</li>
+        <li>Ground crew pushback flow & marshalling signals refreshed.</li>
+        <li>Use standard greeting scripts for boarding.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SOP / POLICIES -->
+  <section id="sops" class="section">
+    <div class="panel">
+      <h3>Flight Operations Manual (Live Doc)</h3>
+      <p class="meta">This embedded Google Doc updates automatically when you edit it.</p>
+      <iframe
+        class="doc-frame"
+        src="https://docs.google.com/document/d/1g3d25HAt1rOmpBE7MvBEuU7vyMzl9RNFYt9c0wMNUWQ/preview"
+        allow="clipboard-write"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </section>
+
+  <!-- PILOTS -->
+  <section id="pilot" class="section">
+    <div class="panel">
+      <h3>Pilot – Flight Operations Checklist</h3>
+      <p class="meta">Use this checklist for all flights.</p>
+
+      <details open>
+        <summary>1) Preflight</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Aircraft parked correctly; chocks + GPU.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Battery ON / external power verified; avionics up.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Walkaround: gear, engines, controls, lights, fuselage.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Fuel & payload within limits.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">FMC/FMS set: route, perf, runway.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Wx/NOTAMs/ops advisories reviewed.</div></label>
+        </div>
+      </details>
+      <details>
+        <summary>2) Boarding Preparation</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Coordinate with gate for boarding.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Environmental systems set.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Welcome announcement.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Crew brief (runway/routing, wx/turb, taxi & holds).</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Cabin secure before push.</div></label>
+        </div>
+      </details>
+      <details>
+        <summary>3) Pushback & Engine Start</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">APU start; bleed set for engine start.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Pushback clearance & direction confirmed.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Brakes set for tug connect; release on command.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Engine start per SOP; parameters stabilized.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Tug disconnect; cleared to taxi.</div></label>
+        </div>
+      </details>
+      <details>
+        <summary>4) Taxi Out</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Before Taxi checklist complete.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Taxi ≤30 kts straight; ≤10 kts in turns.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Hold short compliance; RWY clear to cross.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">ATC/UNICOM as required.</div></label>
+        </div>
+      </details>
+      <details>
+        <summary>5) Takeoff</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Before Takeoff complete; lineup & clear.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Takeoff power set; monitor engines.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">VR rotate; positive rate—gear up.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Retract flaps on schedule; &lt;250 kts below 10k.</div></label>
+        </div>
+      </details>
+      <details><summary>6) Climb</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Climb profile maintained.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Engines & pressurization monitored.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">After TO & Climb checks.</div></label>
+        </div>
+      </details>
+      <details><summary>7) Cruise</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Level; cruise thrust set.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Path/fuel/wx monitored; cruise PA.</div></label>
+        </div>
+      </details>
+      <details><summary>8) Descent</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Arrival/approach brief; Descent checklist.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Planned rate/speed; descent PA.</div></label>
+        </div>
+      </details>
+      <details><summary>9) Approach</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Runway/config confirmed; Approach checklist.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Gear & flaps on schedule; stabilized approach.</div></label>
+        </div>
+      </details>
+      <details><summary>10) Landing</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">TDZ touchdown; reversers/brakes as needed; vacate.</div></label>
+        </div>
+      </details>
+      <details><summary>11) Taxi In & Shutdown</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">10–15 kts to gate; marshal guidance.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Park brake; chocks; shutdown checklist.</div></label>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- GROUND CREW -->
+  <section id="ground" class="section">
+    <div class="panel">
+      <h3>Ground Crew – Procedures</h3>
+      <p class="meta">Ramp safety first. Use hand signals and coordinate with cockpit.</p>
+      <details open><summary>Ramp Safety</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Cones/chocks positioned; area clear of traffic & debris.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Marshalling wands ready; reflective gear on.</div></label>
+        </div>
+      </details>
+      <details><summary>Pushback & Guidance</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Confirm brakes released; begin push on signal.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Clear taxi path; hand-signal stop/turns as needed.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Remove chocks/cones; thumbs up to cockpit.</div></label>
+        </div>
+      </details>
+      <details><summary>Gate Arrival</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Marshal to stop line; signal chocks in; safe area before deplaning.</div></label>
+        </div>
+      </details>
+    </div>
+    <div class="panel">
+      <h3>Standard Hand Signals (Quick)</h3>
+      <ul class="meta"><li>Stop ✋ • Turn Left ↩️ • Turn Right ↪️ • Proceed 👌</li></ul>
+    </div>
+  </section>
+
+  <!-- FLIGHT ATTENDANTS -->
+  <section id="fa" class="section">
+    <div class="panel">
+      <h3>Flight Attendants – Cabin Procedures</h3>
+      <p class="meta">Use the scripts and checks. Coordinate with cockpit.</p>
+      <details open><summary>Boarding & Briefing</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Cabin ready; galley secured; doors/slide status confirmed.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Welcome announcement; special needs identified.</div></label>
+        </div>
+      </details>
+      <details><summary>Safety Demo</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Seatbelts, exits, life vests, oxygen masks demonstrated.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Final cabin check (belts, bags, electronics).</div></label>
+        </div>
+      </details>
+      <details><summary>In-Flight Service</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Cabin walk-through; respond to calls; maintain calm cabin.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Trash collection; prepare for descent announcement.</div></label>
+        </div>
+      </details>
+      <details><summary>Arrival</summary>
+        <div class="checklist">
+          <label class="item"><input type="checkbox"/><div class="label">Cabin secure; jumpseats; arrival announcement.</div></label>
+          <label class="item"><input type="checkbox"/><div class="label">Deplane assistance; final cabin sweep.</div></label>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel">
+      <h3>Flight Attendant Handbook (Live Doc)</h3>
+      <p class="meta">Embedded Google Doc — placed at the bottom of this page as requested.</p>
+      <iframe
+        class="doc-frame"
+        src="https://docs.google.com/document/d/1NfOjC3YaUNRHjR0YQo0mYMRD5RfDOdQRYG5D_IZorWg/preview"
+        allow="clipboard-write"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section id="resources" class="section">
+    <div class="grid">
+      <div class="panel">
+        <h3>Useful Tools & Links</h3>
+        <ul class="meta" style="line-height:1.9">
+          <li><a href="https://zedruc.net/24planner" target="_blank" rel="noopener">24 Hour Planner</a></li>
+          <li><a href="https://drive.google.com/drive/folders/1zR_GdIVsVLusehPdGJQa1noolwLezop-?usp=sharing" target="_blank" rel="noopener">Shared Google Drive Folder</a></li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1SUjdRAweo4z7TPgQyo8BHlSswbSK2YP4stx88cUDdWQ/edit?gid=2013895125" target="_blank" rel="noopener">Dispatch / Sheets</a></li>
+          <li><a href="https://github.com/axisdadev/OFPGenerator" target="_blank" rel="noopener">OFP Generator (GitHub)</a></li>
+          <li><a href="https://sites.google.com/view/performancecalculatorptfs/performance-calculator" target="_blank" rel="noopener">PTFS Performance Calculator</a></li>
+          <li><a href="https://p1anes.github.io/ATC24-Radar/" target="_blank" rel="noopener">ATC24 Radar</a></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Radio Callsigns (Seniority Based)</h3>
+        <ul class="meta" style="line-height:1.8">
+          <li>Senior Flight Attendant — <strong>FA1</strong></li>
+          <li>Flight Attendant 1 — <strong>FA2</strong></li>
+          <li>Flight Attendant 2 — <strong>FA3</strong></li>
+          <li>Senior Ground Crew — <strong>GC1</strong></li>
+          <li>Ground Crew 1 — <strong>GC2</strong></li>
+          <li>Ground Crew 2 — <strong>GC3</strong></li>
+          <li>Captain — <strong>PLT1</strong></li>
+          <li>First Officer — <strong>PLT2</strong></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Config: passcode + session memory
+  const CONFIG = { PASSCODE:'LUVCREW', TOKEN_KEY:'swaStaffAuth', TOKEN_TTL_MS:24*60*60*1000 };
+
+  // Auth logic
+  const overlay = document.getElementById('auth');
+  const pass = document.getElementById('pass');
+  const go = document.getElementById('go');
+  const err = document.getElementById('authErr');
+  const app = document.getElementById('app');
+
+  function isAuthed(){
+    try{
+      const raw = localStorage.getItem(CONFIG.TOKEN_KEY);
+      if(!raw) return false;
+      const d = JSON.parse(raw);
+      return Date.now() - d.time < CONFIG.TOKEN_TTL_MS;
+    }catch(e){ return false; }
+  }
+  function setAuthed(){ localStorage.setItem(CONFIG.TOKEN_KEY, JSON.stringify({time:Date.now()})); }
+  function unlock(){
+    const input = (pass.value||'').trim();
+    if(input.toLowerCase() === CONFIG.PASSCODE.toLowerCase()){
+      setAuthed();
+      overlay.style.display='none';
+      app.removeAttribute('aria-hidden');
+      err.style.display='none';
+    }else{
+      err.style.display='block';
+      pass.focus();
+    }
+  }
+  go.addEventListener('click', unlock);
+  pass.addEventListener('keydown', e=>{ if(e.key==='Enter') unlock(); });
+  if(isAuthed()){ overlay.style.display='none'; app.removeAttribute('aria-hidden'); }
+
+  // Tabs
+  const tabs = document.querySelectorAll('.tab');
+  const sections = document.querySelectorAll('.section');
+  function show(id){
+    sections.forEach(s => s.classList.toggle('active', s.id === id));
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.target === id));
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.target)));
+</script>
+</body>
+</html>
