@@ -6,8 +6,8 @@
 <title>Southwest Airlines PTFS • Staff Portal</title>
 <style>
   :root{
-    /* Southwest theme */
-    --bg-solid:#304cb2;      /* MAIN background */
+  
+    --bg-solid:#304cb2;      
     --ink:#eaf1ff;
     --muted:#dfe7ff;
     --brand:#ffbf27;
@@ -21,7 +21,7 @@
     --shadow:0 18px 50px rgba(0,0,0,.35);
     --shadow-sm:0 8px 24px rgba(0,0,0,.28);
 
-    /* Doc frame height – one full page visible, scroll for more */
+    
     --doc-h-desktop: 1250px;
     --doc-h-tablet: 1100px;
     --doc-h-mobile: 950px;
@@ -32,22 +32,18 @@
   body{
     margin:0; color:var(--ink);
     font:15px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    background: var(--bg-solid);  /* solid SWA blue — content stays still */
+    background: var(--bg-solid);  
     overflow-x:hidden;
   }
 
-  /* ===== QUICKER GRADIENT WAVES BACKGROUND =====
-     Two large blurred gradient layers that rotate/scale a bit faster.
-     • Adjust speed with the animation durations
-     • Adjust intensity with opacity values below
-  */
+  
   .waves, .waves2{
     position:fixed;
     left:-20vmax; top:-20vmax; right:-20vmax; bottom:-20vmax;
-    z-index:-3;                   /* behind everything */
+    z-index:-3;                   
     pointer-events:none;
     filter: blur(64px) saturate(112%);
-    opacity:.40;                  /* << lower for subtler, raise for stronger */
+    opacity:.40;                  
     will-change: transform, filter;
   }
   .waves{
@@ -56,7 +52,7 @@
       radial-gradient(46% 38% at 72% 33%, rgba(192,22,27,0.40), transparent 72%),
       radial-gradient(42% 36% at 60% 70%, rgba(250,169,25,0.36), transparent 75%),
       radial-gradient(58% 46% at 35% 65%, rgba(48,76,178,0.36), transparent 70%);
-    /* faster than before (was 180s) */
+    
     animation: waves-spin 75s linear infinite, waves-breathe 18s ease-in-out infinite alternate;
   }
   .waves2{
@@ -65,7 +61,7 @@
       radial-gradient(45% 35% at 30% 40%, rgba(250,169,25,0.30), transparent 72%),
       radial-gradient(50% 42% at 75% 60%, rgba(192,22,27,0.34), transparent 72%),
       radial-gradient(42% 36% at 55% 25%, rgba(48,76,178,0.32), transparent 74%);
-    /* counter-rotate, a touch slower than layer 1 */
+    
     animation: waves-spin-rev 95s linear infinite, waves-breathe 22s ease-in-out infinite alternate-reverse;
     opacity:.34;
   }
@@ -82,7 +78,7 @@
     to  { filter: blur(84px) saturate(122%); }
   }
 
-  /* Top Nav */
+ 
   .topbar{
     position:sticky; top:0; z-index:1000;
     display:flex; align-items:center; justify-content:space-between;
@@ -112,10 +108,10 @@
   }
   .signout:hover{ background:rgba(255,255,255,.08) }
 
-  /* Layout */
+  
   .wrap{ max-width:1200px; margin:24px auto; padding:0 20px; }
 
-  /* Panels & general UI */
+  
   .grid{ display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));}
   .panel{ background:var(--panel); border:var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; backdrop-filter: blur(8px) }
   .panel h3{margin:0 0 10px 0}
@@ -127,7 +123,7 @@
   a{color:#fff; text-decoration:underline}
   a:hover{text-decoration:none}
 
-  /* Dashboard hero (ONLY on dashboard) */
+
   .hero{
     display:flex; align-items:center; justify-content:space-between; gap:20px;
     padding:18px; border-radius:20px; border:var(--border);
@@ -139,12 +135,12 @@
   .pill{display:inline-block; background:rgba(255,255,255,.15); color:#fff; font-weight:700; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.35)}
   .meta{color:var(--muted); font-size:13px}
 
-  /* Sections */
+  
   .section{ display:none; animation:pop .18s ease }
   .section.active{ display:block }
   @keyframes pop{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
 
-  /* Checklists */
+  
   details{ border:var(--border); border-radius:14px; background:rgba(255,255,255,.08); padding:10px; }
   details+details{ margin-top:10px }
   details summary{ cursor:pointer; font-weight:800; list-style:none }
@@ -155,7 +151,7 @@
   .item input[type="checkbox"]{ width:18px; height:18px; margin-top:2px; accent-color:#ffbf27 }
   .label{ flex:1 }
 
-  /* Doc frames */
+  
   .doc-frame{
     width:100%;
     height:var(--doc-h-desktop);
@@ -167,7 +163,7 @@
   @media (max-width:1100px){ .doc-frame{ height:var(--doc-h-tablet); } }
   @media (max-width:720px){ .doc-frame{ height:var(--doc-h-mobile); } }
 
-  /* Auth overlay */
+ 
   .auth{
     position:fixed; inset:0; z-index:9999; display:grid; place-items:center;
     background: var(--bg-solid);
@@ -192,11 +188,11 @@
 </head>
 <body>
 
-<!-- QUICKER GRADIENT WAVES -->
+
 <div class="waves" aria-hidden="true"></div>
 <div class="waves2" aria-hidden="true"></div>
 
-<!-- AUTH OVERLAY -->
+
 <div class="auth" id="auth">
   <div class="auth-card">
     <div class="brand" style="margin-bottom:6px;">
@@ -212,7 +208,7 @@
   </div>
 </div>
 
-<!-- TOP NAV -->
+
 <header class="topbar">
   <div class="brand">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s8-4.5 8-11a8 8 0 0 0-16 0c0 6.5 8 11 8 11Z" stroke="#fff" stroke-width="2"/></svg>
@@ -233,7 +229,7 @@
 
 <main class="wrap" id="app" aria-hidden="true">
 
-  <!-- DASHBOARD ONLY -->
+ 
   <section id="dashboard" class="section active">
     <div class="hero">
       <div>
@@ -266,7 +262,7 @@
     </div>
   </section>
 
-  <!-- ANNOUNCEMENTS -->
+ 
   <section id="announcements" class="section">
     <div class="panel">
       <h3>Latest Updates</h3>
@@ -278,7 +274,7 @@
     </div>
   </section>
 
-  <!-- SOP / POLICIES -->
+ 
   <section id="sops" class="section">
     <div class="panel">
       <h3>Flight Operations Manual (Live Doc)</h3>
@@ -292,7 +288,7 @@
     </div>
   </section>
 
-  <!-- PILOTS -->
+
   <section id="pilot" class="section">
     <div class="panel">
       <h3>Pilot – Flight Operations Checklist</h3>
@@ -386,7 +382,7 @@
     </div>
   </section>
 
-  <!-- GROUND CREW -->
+ 
   <section id="ground" class="section">
     <div class="panel">
       <h3>Ground Crew – Procedures</h3>
@@ -416,7 +412,7 @@
     </div>
   </section>
 
-  <!-- FLIGHT ATTENDANTS -->
+  
   <section id="fa" class="section">
     <div class="panel">
       <h3>Flight Attendants – Cabin Procedures</h3>
@@ -459,7 +455,7 @@
     </div>
   </section>
 
-  <!-- RESOURCES -->
+  
   <section id="resources" class="section">
     <div class="grid">
       <div class="panel">
@@ -491,10 +487,10 @@
 </main>
 
 <script>
-  // Config: passcode + session memory
+  
   const CONFIG = { PASSCODE:'LUVCREW', TOKEN_KEY:'swaStaffAuth', TOKEN_TTL_MS:24*60*60*1000 };
 
-  // Auth logic
+ 
   const overlay = document.getElementById('auth');
   const pass = document.getElementById('pass');
   const go = document.getElementById('go');
@@ -526,7 +522,7 @@
   pass.addEventListener('keydown', e=>{ if(e.key==='Enter') unlock(); });
   if(isAuthed()){ overlay.style.display='none'; app.removeAttribute('aria-hidden'); }
 
-  // Tabs
+ 
   const tabs = document.querySelectorAll('.tab');
   const sections = document.querySelectorAll('.section');
   function show(id){
@@ -538,3 +534,4 @@
 </script>
 </body>
 </html>
+
